@@ -1,7 +1,6 @@
 // import { useState } from 'react'
 import { ChangeEventHandler, useState } from "react";
 import "./App.css";
-import { ModalForm } from "./components/Modal/Modal.tsx";
 import { Navbar } from "./components/Navbar/Navbar.tsx";
 import { Table } from "./components/table/table.tsx";
 import { TableRow } from "./types.tsx";
@@ -9,30 +8,19 @@ import { InputAdornment, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 function App() {
-  const [rows, setRows] = useState([
-    { status: false, task: "Drink milk" },
-    { status: false, task: "Go for a walk" },
-    { status: false, task: "Go to sleep" },
+  const [rows, setRows] = useState<TableRow[]>([
+    { id: 1, status: false, task: "Drink milk" },
+    { id: 2, status: false, task: "Go for a walk" },
+    { id: 3, status: false, task: "Go to sleep" },
   ]);
 
   const handelDeleteRow = (targetIndex: number) => {
-    setRows(rows.filter((_, index) => index !== targetIndex));
+    setRows(rows.filter((row, _) =>row.id !== targetIndex));
   };
 
   const handelSubmit = (newRow: TableRow) => {
     setRows([...rows, newRow]);
   };
-
-
-
-  // const [rowToEdit, setRowToEdit] = useState<number | null>(null);
-
-  // const handleEdit = (index: number) => {
-  //   setRowToEdit(index);
-  // }
-
-
-
 
 
   const [search, setSearch] = useState<string>("");
@@ -41,7 +29,7 @@ function App() {
     setSearch(event.target.value);
 
   const filteredRows: TableRow[] = rows.filter((row: TableRow) =>
-    Object.values(row).some((value) => value.toString().includes(search))
+    row.task.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -71,7 +59,6 @@ function App() {
         onSubmit={handelSubmit}
       />
 
-      <ModalForm />
     </div>
   );
 }

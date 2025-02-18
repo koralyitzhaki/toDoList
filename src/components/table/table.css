@@ -20,6 +20,20 @@
   /* border-color: rgba(61, 61, 61, 0.466); */
 }
 
+
+.editing{
+  background-color: #e3e3e3;
+  border-bottom: 2px solid #9d9d9d;
+  animation: blink-caret 2s step-end infinite;
+  color: #9d9d9d;
+}
+
+@keyframes blink-caret {
+  50% {
+    border-bottom-color: transparent;
+  }
+}
+
 .table tbody tr:hover {
   background-color: #eee;
 }

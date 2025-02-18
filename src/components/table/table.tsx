@@ -12,8 +12,13 @@ interface TableProps {
   onSubmit: (newRow: TableRow) => void;
 }
 
+
 export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
-  const [formState, setFormState] = useState({
+  const [largestId, setLargestId] = useState<number>(3);
+
+
+  const [formState, setFormState] = useState<TableRow>({
+    id: largestId + 1,
     status: false,
     task: "",
   });
@@ -39,6 +44,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
 
   const handelSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    setLargestId(largestId + 1);
     if (!validateForm()) return;
     onSubmit(formState);
     setFormState({
@@ -46,21 +52,24 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
       task: "",
     });
   };
+  console.log(rows)
+
+
+
 
 
   const [editMode, setEditMode] = useState<number | null>(null);
 
-  const handelInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handelChange(e);
+  const handEditClick = (id: number) => {
+    if (editMode === null){
+      setEditMode(id);
+    }
   }
 
-  const handEditClick = (id: number) => {
-    if (editMode === null)
-      setEditMode(id);
-    else
+  const handelClose = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter")
       setEditMode(null);
   }
-
 
 
 
@@ -68,15 +77,15 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
     <table className="table">
       <tbody>
         {rows.map((row, index) => (
-          <tr key={index}>
+          <tr key={row.id}>
             <td>
               <Checkbox />
             </td>
-            <td className="expand" contentEditable={index === editMode} onBlur={() => handelInput}>{row.task}</td>
-            <td className="action" onClick={() => deleteRow(index)}>
+            <td className={editMode !== null &&  row.id === editMode ? "expand editing":"expand"} onKeyDown={handelClose} contentEditable={row.id === editMode} onBlur={() => handelChange}>{row.task}</td>
+            <td className="action" onClick={() => deleteRow(row.id)}>
               <HighlightOffIcon sx={{ color: pink[500] }} />
             </td>
-            <td className="action" onClick={() => handEditClick(index)}>
+            <td className="action" onClick={() => handEditClick(row.id)}>
               <EditIcon color="disabled"/>
             </td>
           </tr>
@@ -100,6 +109,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
         </td>
       </tbody>
       {error && <label>{error}</label>}
+    
     </table>
   );
 };
