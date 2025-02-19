@@ -8,17 +8,18 @@ import { InputAdornment, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
 function App() {
+
   const [rows, setRows] = useState<TableRow[]>([
-    { id: 1, status: false, task: "Drink milk" },
-    { id: 2, status: false, task: "Go for a walk" },
-    { id: 3, status: false, task: "Go to sleep" },
+    { id: 1, checked: false, task: "Drink milk" },
+    { id: 2, checked: false, task: "Go for a walk" },
+    { id: 3, checked: false, task: "Go to sleep" },
   ]);
 
-  const handelDeleteRow = (targetIndex: number) => {
-    setRows(rows.filter((row, _) =>row.id !== targetIndex));
+  const handleDeleteRow = (id: number) => {
+    setRows(rows.filter((row, _) =>row.id !== id));
   };
 
-  const handelSubmit = (newRow: TableRow) => {
+  const handleSubmit = (newRow: TableRow) => {
     setRows([...rows, newRow]);
   };
 
@@ -31,6 +32,24 @@ function App() {
   const filteredRows: TableRow[] = rows.filter((row: TableRow) =>
     row.task.toLowerCase().includes(search.toLowerCase())
   );
+  
+
+  const handleCheckAll = (checkAll: boolean) => {
+    let newRows = filteredRows.map(checkBox => (
+        {...checkBox, checked: checkAll}
+      ))
+    setRows([...newRows,...rows.filter(row => !newRows.some(newRow => newRow.id === row.id))]);
+  }
+
+
+  const handleCheckBoxChange = (id: number) => {
+    setRows(checkBoxses => 
+      checkBoxses.map(checkbox =>
+      checkbox.id === id ? {
+        ...checkbox, checked: !checkbox.checked
+      } : checkbox ));
+  }
+
 
   return (
     <div className="App">
@@ -55,9 +74,17 @@ function App() {
 
       <Table
         rows={filteredRows}
-        deleteRow={handelDeleteRow}
-        onSubmit={handelSubmit}
+        deleteRow={handleDeleteRow}
+        onSubmit={handleSubmit}
+        onChange={handleCheckBoxChange}
+
       />
+
+      <div className="buttons"> 
+        <button onClick={() => handleCheckAll(true)}>check all</button>
+        <button onClick={() => handleCheckAll(false)}>uncheck all</button>
+      </div>
+
 
     </div>
   );

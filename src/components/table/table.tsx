@@ -8,22 +8,25 @@ import "./table.css";
 
 interface TableProps {
   rows: TableRow[];
-  deleteRow: (targetIndex: number) => void;
+  deleteRow: (id: number) => void;
   onSubmit: (newRow: TableRow) => void;
+  onChange: (id: number) => void;
 }
 
+const getLargestId = (id: number) => {
+  return id + 1;
+}
+let largestId = getLargestId(3);
 
-export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
-  const [largestId, setLargestId] = useState<number>(3);
-
+export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) => {
 
   const [formState, setFormState] = useState<TableRow>({
-    id: largestId + 1,
-    status: false,
+    id: largestId,
+    checked: false,
     task: "",
   });
 
-  const handelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormState({
       ...formState,
       task: e.target.value,
@@ -44,14 +47,31 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
 
   const handelSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setLargestId(largestId + 1);
-    if (!validateForm()) return;
+    largestId = getLargestId(largestId);
+    if (!validateForm()) return;  
     onSubmit(formState);
     setFormState({
       ...formState,
+      id: largestId,
+      checked: false,
       task: "",
     });
   };
+
+  const handelSubmitEnter = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      largestId = getLargestId(largestId);
+      if (!validateForm()) return;
+      onSubmit(formState);
+      setFormState({
+        ...formState,
+        id: largestId,
+        checked: false,
+        task: "",
+      });
+    }
+  }
   console.log(rows)
 
 
@@ -60,15 +80,26 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
 
   const [editMode, setEditMode] = useState<number | null>(null);
 
-  const handEditClick = (id: number) => {
-    if (editMode === null){
+  const handleEditClick = (id: number) => {
+    if (rows.find(row => row.id === id)?.checked === false) {
       setEditMode(id);
+    } 
+    if (editMode === id) {
+      setEditMode(null);
     }
   }
 
-  const handelClose = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleClose = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter")
       setEditMode(null);
+  }
+
+  const handleCheck= (id: number): boolean => {
+    if (id !== editMode) {
+      onChange(id);
+    }
+
+    return true;
   }
 
 
@@ -76,40 +107,45 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit}) => {
   return (
     <table className="table">
       <tbody>
-        {rows.map((row, index) => (
+        {rows.map((row, _) => (
           <tr key={row.id}>
             <td>
-              <Checkbox />
+              <Checkbox key={row.id} checked={row.checked} onClick={() => handleCheck(row.id)}/>
             </td>
-            <td className={editMode !== null &&  row.id === editMode ? "expand editing":"expand"} onKeyDown={handelClose} contentEditable={row.id === editMode} onBlur={() => handelChange}>{row.task}</td>
+            <td className={editMode !== null && row.id === editMode ? "expand editing":"expand"} onKeyDown={handleClose} contentEditable={row.id === editMode} onBlur={() => handleChange}>{row.task}</td>
             <td className="action" onClick={() => deleteRow(row.id)}>
               <HighlightOffIcon sx={{ color: pink[500] }} />
             </td>
-            <td className="action" onClick={() => handEditClick(row.id)}>
+            <td className="action" onClick={() => handleEditClick(row.id)}>
               <EditIcon color="disabled"/>
             </td>
           </tr>
         ))}
-        <td colSpan={2} className="task-td">
-          <TextField
-            onChange={handelChange}
-            className="AddTaskBar"
-            value={formState.task}
-            fullWidth
-            slotProps={{
-              input: {
-                placeholder: "Task...",
-              },
-            }}
-          />
-        </td>
+        <tr>
+          <td colSpan={2} className="task-td">
+            <TextField
+              onChange={handleChange}
+              className="AddTaskBar"
+              value={formState.task}
+              fullWidth
+              slotProps={{
+                input: {
+                  placeholder: "Task...",
+                },
+              }}
+              onKeyDown={handelSubmitEnter}
+            />
+          </td>
 
-        <td colSpan={2} className="task">
-          <button onClick={handelSubmit}>ADD</button>
-        </td>
+          <td colSpan={2} className="task">
+            <button onClick={handelSubmit}>ADD</button>
+          </td>
+        </tr>
       </tbody>
       {error && <label>{error}</label>}
     
     </table>
+
+    
   );
 };

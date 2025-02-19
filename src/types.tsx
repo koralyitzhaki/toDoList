@@ -1,5 +1,5 @@
 export type TableRow = {
     id: number;
-    status: boolean;
+    checked: boolean;
     task: string;
 }
