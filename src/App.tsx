@@ -1,11 +1,11 @@
 // import { useState } from 'react'
-import { ChangeEventHandler, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import { Navbar } from "./components/Navbar/Navbar.tsx";
 import { Table } from "./components/table/table.tsx";
 import { TableRow } from "./types.tsx";
-import { InputAdornment, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { SearchBar } from "./components/SearchBar.tsx";
+// import { Buttons } from "./components/buttons.tsx";
 
 function App() {
 
@@ -24,15 +24,25 @@ function App() {
   };
 
 
+  // const [search, setSearch] = useState<string>("");
+  // const onSearch: ChangeEventHandler<HTMLInputElement> = (event) =>
+  //   setSearch(event.target.value);
+
+  // const filteredRows: TableRow[] = rows.filter((row: TableRow) =>
+  //   row.task.toLowerCase().includes(search.toLowerCase())
+  // );
+
   const [search, setSearch] = useState<string>("");
 
-  const onSearch: ChangeEventHandler<HTMLInputElement> = (event) =>
-    setSearch(event.target.value);
+
+    const handleFiteredRows = (search: string) => {
+      setSearch(search);
+    };
+    
 
   const filteredRows: TableRow[] = rows.filter((row: TableRow) =>
     row.task.toLowerCase().includes(search.toLowerCase())
   );
-  
 
   const handleCheckAll = (checkAll: boolean) => {
     let newRows = filteredRows.map(checkBox => (
@@ -54,8 +64,12 @@ function App() {
   return (
     <div className="App">
       <Navbar />
+      <SearchBar 
+        sendFilteredRows={handleFiteredRows}
+        search={search}
+      />
 
-      <TextField
+      {/* <TextField
         className="SearchBar"
         fullWidth
         value={search}
@@ -70,7 +84,7 @@ function App() {
             ),
           },
         }}
-      />
+      /> */}
 
       <Table
         rows={filteredRows}
@@ -79,6 +93,8 @@ function App() {
         onChange={handleCheckBoxChange}
 
       />
+
+      {/* <Buttons /> */}
 
       <div className="buttons"> 
         <button onClick={() => handleCheckAll(true)}>check all</button>

@@ -5,6 +5,7 @@ import { pink } from "@mui/material/colors";
 import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, TextField } from "@mui/material";
 import "./table.css";
+import { SaveAs } from "@mui/icons-material";
 
 interface TableProps {
   rows: TableRow[];
@@ -72,7 +73,6 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
       });
     }
   }
-  console.log(rows)
 
 
 
@@ -104,6 +104,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
 
 
 
+
   return (
     <table className="table">
       <tbody>
@@ -117,7 +118,9 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
               <HighlightOffIcon sx={{ color: pink[500] }} />
             </td>
             <td className="action" onClick={() => handleEditClick(row.id)}>
-              <EditIcon color="disabled"/>
+              {editMode !== null && row.id === editMode ? 
+              <SaveAs color="success"/> : 
+              <EditIcon color="disabled"/>}
             </td>
           </tr>
         ))}
