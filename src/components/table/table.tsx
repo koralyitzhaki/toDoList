@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, TextField } from "@mui/material";
 import "./table.css";
 import { SaveAs } from "@mui/icons-material";
+import classNames from "classnames";
 
 interface TableProps {
   rows: TableRow[];
@@ -102,6 +103,11 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
     return true;
   }
 
+  const divClasses = (row: TableRow) => classNames({
+    "expand editing": editMode !== null && row.id === editMode,
+    "expand": editMode === null,
+    "checked": row.checked === true
+  })
 
 
 
@@ -113,7 +119,11 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
             <td>
               <Checkbox key={row.id} checked={row.checked} onClick={() => handleCheck(row.id)}/>
             </td>
-            <td className={editMode !== null && row.id === editMode ? "expand editing":"expand"} onKeyDown={handleClose} contentEditable={row.id === editMode} onBlur={() => handleChange}>{row.task}</td>
+            <td className={divClasses(row)}
+            onKeyDown={handleClose} contentEditable={row.id === editMode} 
+            onBlur={() => handleChange}>
+              {row.task}
+            </td>
             <td className="action" onClick={() => deleteRow(row.id)}>
               <HighlightOffIcon sx={{ color: pink[500] }} />
             </td>

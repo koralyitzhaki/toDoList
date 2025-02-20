@@ -34,12 +34,10 @@ function App() {
 
   const [search, setSearch] = useState<string>("");
 
-
-    const handleFiteredRows = (search: string) => {
-      setSearch(search);
-    };
+  const handleFiteredRows = (search: string) => {
+    setSearch(search);
+  };
     
-
   const filteredRows: TableRow[] = rows.filter((row: TableRow) =>
     row.task.toLowerCase().includes(search.toLowerCase())
   );
