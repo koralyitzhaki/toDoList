@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { ChangeEvent, FC, useState } from "react";
 import { TableRow } from "../../types";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { pink } from "@mui/material/colors";
@@ -7,12 +7,18 @@ import { Checkbox, TextField } from "@mui/material";
 import "./table.css";
 import { SaveAs } from "@mui/icons-material";
 import classNames from "classnames";
+import editModeStore from "../../atoms/editMode.store";
+import { useRecoilState } from "recoil";
+import { Slide, ToastContainer } from 'react-toastify';
+
 
 interface TableProps {
   rows: TableRow[];
   deleteRow: (id: number) => void;
   onSubmit: (newRow: TableRow) => void;
   onChange: (id: number) => void;
+  handleEdit: (editedRowValue: string, rowId: number) => void;
+  checkNotNull: () => boolean;
 }
 
 const getLargestId = (id: number) => {
@@ -20,7 +26,7 @@ const getLargestId = (id: number) => {
 }
 let largestId = getLargestId(3);
 
-export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) => {
+export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, handleEdit, checkNotNull }) => {
 
   const [formState, setFormState] = useState<TableRow>({
     id: largestId,
@@ -29,10 +35,12 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState({
-      ...formState,
-      task: e.target.value,
-    });
+    if (checkNotNull()) {
+      setFormState({
+        ...formState,
+        task: e.target.value,
+      });
+    }
   };
 
   const [error, setError] = useState("");
@@ -79,20 +87,33 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
 
 
 
-  const [editMode, setEditMode] = useState<number | null>(null);
+  // const [editMode, setEditMode] = useState<number | null>(null);
+  const [editMode, setEditMode] = useRecoilState(editModeStore);
+
+
+  const handleEditChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: number) => {
+    handleEdit(e.target.value, id);
+  }
+
 
   const handleEditClick = (id: number) => {
-    if (rows.find(row => row.id === id)?.checked === false) {
-      setEditMode(id);
-    } 
-    if (editMode === id) {
-      setEditMode(null);
+    if (checkNotNull()) {
+      if (rows.find(row => row.id === id)?.checked === false) {
+        setEditMode(id);
+      } 
+      if (editMode === id) {
+        setEditMode(null);
+      }
     }
   }
 
+
   const handleClose = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter")
-      setEditMode(null);
+    if (e.key === "Enter") {
+      if (checkNotNull()) {
+        setEditMode(null);
+      }
+    }
   }
 
   const handleCheck= (id: number): boolean => {
@@ -104,8 +125,8 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
   }
 
   const divClasses = (row: TableRow) => classNames({
-    "expand editing": editMode !== null && row.id === editMode,
-    "expand": editMode === null,
+    "editing": editMode !== null && row.id === editMode,
+    "expand": true,
     "checked": row.checked === true
   })
 
@@ -119,11 +140,11 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
             <td>
               <Checkbox key={row.id} checked={row.checked} onClick={() => handleCheck(row.id)}/>
             </td>
-            <td className={divClasses(row)}
-            onKeyDown={handleClose} contentEditable={row.id === editMode} 
-            onBlur={() => handleChange}>
-              {row.task}
+            <td className="expand">
+              <TextField value={row.task} className={divClasses(row)}
+              onKeyDown={handleClose} disabled={row.id !== editMode} onChange={(event) => handleEditChange(event, row.id)} />
             </td>
+            
             <td className="action" onClick={() => deleteRow(row.id)}>
               <HighlightOffIcon sx={{ color: pink[500] }} />
             </td>
@@ -135,7 +156,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
           </tr>
         ))}
         <tr>
-          <td colSpan={2} className="task-td">
+          <td colSpan={2} className="task-td expand">
             <TextField
               onChange={handleChange}
               className="AddTaskBar"
@@ -156,7 +177,20 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange}) =>
         </tr>
       </tbody>
       {error && <label>{error}</label>}
-    
+      <ToastContainer
+      position="top-center"
+      autoClose={1000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"
+      transition={Slide}
+      />
+
     </table>
 
     

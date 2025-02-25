@@ -5,12 +5,15 @@ import { InputAdornment, TextField } from "@mui/material";
 interface SearchBarProps {
   sendFilteredRows: (search: string) => void;
   search: string;
+  checkNotNull: () => boolean;
 }
 
-export const SearchBar: FC<SearchBarProps> = ({ sendFilteredRows, search }) => {
+export const SearchBar: FC<SearchBarProps> = ({ sendFilteredRows, search, checkNotNull }) => {
 
   const onSearch: ChangeEventHandler<HTMLInputElement> = (event) => {
-    sendFilteredRows(event.target.value);
+    if (checkNotNull()) {
+      sendFilteredRows(event.target.value);
+    }
   }
 
   return (
