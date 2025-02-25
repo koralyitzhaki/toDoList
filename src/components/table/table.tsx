@@ -9,7 +9,6 @@ import { SaveAs } from "@mui/icons-material";
 import classNames from "classnames";
 import editModeStore from "../../atoms/editMode.store";
 import { useRecoilState } from "recoil";
-import { Slide, ToastContainer } from 'react-toastify';
 
 
 interface TableProps {
@@ -19,6 +18,8 @@ interface TableProps {
   onChange: (id: number) => void;
   handleEdit: (editedRowValue: string, rowId: number) => void;
   checkNotNull: () => boolean;
+  checkEditModeOpen: (id?: number) => boolean;
+  showToast: (message: string, id: string) => void;
 }
 
 const getLargestId = (id: number) => {
@@ -26,7 +27,7 @@ const getLargestId = (id: number) => {
 }
 let largestId = getLargestId(3);
 
-export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, handleEdit, checkNotNull }) => {
+export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, handleEdit, checkNotNull, checkEditModeOpen, showToast }) => {
 
   const [formState, setFormState] = useState<TableRow>({
     id: largestId,
@@ -36,6 +37,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (checkNotNull()) {
+
       setFormState({
         ...formState,
         task: e.target.value,
@@ -43,16 +45,12 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
     }
   };
 
-  const [error, setError] = useState("");
-
   const validateForm = () => {
     if (formState.task === "") {
-      setError("Task is required");
+      showToast("Task is required", "error");
       return false;
-    } else {
-      setError("");
-      return true;
     }
+    return true;
   };
 
   const handelSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -60,6 +58,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
     largestId = getLargestId(largestId);
     if (!validateForm()) return;  
     onSubmit(formState);
+    showToast("Task added", "success");
     setFormState({
       ...formState,
       id: largestId,
@@ -74,6 +73,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
       largestId = getLargestId(largestId);
       if (!validateForm()) return;
       onSubmit(formState);
+      showToast("Task added", "success");
       setFormState({
         ...formState,
         id: largestId,
@@ -84,10 +84,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
   }
 
 
-
-
-
-  // const [editMode, setEditMode] = useState<number | null>(null);
+  
   const [editMode, setEditMode] = useRecoilState(editModeStore);
 
 
@@ -98,11 +95,16 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
 
   const handleEditClick = (id: number) => {
     if (checkNotNull()) {
-      if (rows.find(row => row.id === id)?.checked === false) {
-        setEditMode(id);
-      } 
+      (rows.find(row => row.id === id)?.checked === false) ?
+        setEditMode(id) :
+        showToast("can not edit when checked", "error");
       if (editMode === id) {
         setEditMode(null);
+        showToast("Task edited", "success");
+
+        // if () {
+
+        // }
       }
     }
   }
@@ -112,16 +114,20 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
     if (e.key === "Enter") {
       if (checkNotNull()) {
         setEditMode(null);
+        showToast("Task edited", "success");
+
+        // if () {
+
+        // }
       }
     }
   }
 
   const handleCheck= (id: number): boolean => {
-    if (id !== editMode) {
+    if (checkEditModeOpen(id)) {
       onChange(id);
     }
-
-    return true;
+    return (id !== editMode);
   }
 
   const divClasses = (row: TableRow) => classNames({
@@ -176,23 +182,7 @@ export const Table: FC<TableProps> = ({ rows, deleteRow, onSubmit, onChange, han
           </td>
         </tr>
       </tbody>
-      {error && <label>{error}</label>}
-      <ToastContainer
-      position="top-center"
-      autoClose={1000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="colored"
-      transition={Slide}
-      />
-
     </table>
-
     
   );
 };

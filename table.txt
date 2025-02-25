@@ -1,0 +1,51 @@
+const [editMode, setEditMode] = useRecoilState(editModeStore);
+  const [updatedRow, setUpdatedRow] = useState<string>("");
+
+
+
+  const handleEditChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, currRowId: number) => {
+    // setUpdatedRow(rows.find(row => row.id === currRowId)?.task!);
+    setUpdatedRow(e.target.value);
+    console.log(updatedRow);
+  }
+
+
+  const handleEditClick = (id: number) => {
+    if (checkNotNull()) {
+      (rows.find(row => row.id === id)?.checked === false) ?
+        setEditMode(id) :
+        showToast("can not edit when checked", "error");
+      if (editMode === id) {
+        setUpdatedRow(rows.find(row => row.id === id)?.task!);
+        handleEdit(updatedRow, id);
+        setUpdatedRow(rows.find(row => row.id === id)?.task!);
+        setEditMode(null); 
+        showToast("Task edited", "success");
+
+        // if () {
+
+        // }
+      }
+    }
+  }
+
+
+
+
+
+
+
+  <td className="expand">
+    <TextField value={editMode === row.id ? updatedRow : row.task} className={divClasses(row)}
+    onKeyDown={(event) => handleClose(event, row.id)} disabled={row.id !== editMode} 
+    onChange={(event) => handleEditChange(event, row.id)} />
+</td>
+
+<td className="action" onClick={() => deleteRow(row.id)}>
+    <HighlightOffIcon sx={{ color: pink[500] }} />
+</td>
+<td className="action" onClick={() => handleEditClick(row.id)}>
+    {editMode !== null && row.id === editMode ? 
+    <SaveAs color="success"/> : 
+    <EditIcon color="disabled"/>}
+</td>

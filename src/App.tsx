@@ -6,22 +6,20 @@ import { Table } from "./components/table/table.tsx";
 import { TableRow } from "./types.tsx";
 import { SearchBar } from "./components/SearchBar.tsx";
 // import { Buttons } from "./components/buttons.tsx";
+import { Slide, ToastContainer } from 'react-toastify';
 
 import { useRecoilState } from "recoil";
 import editModeStore from "./atoms/editMode.store.ts";
 import { toast } from "react-toastify";
+  
+let showToast = (message: string, id: string) => {
+  if (!toast.isActive(id)) {
+    toast(message, { toastId: id, style: {color: id === "error" ? "indianred": id === "success" ? "Green" : "Gold"}} )
+  }
+};
 
 
 function App() {
-
-  const showToast = (message: string, id: string) => {
-    if (!toast.isActive(id)) {
-      toast(message, { toastId: id })
-    }
-  };
-
-
-
 
   const [rows, setRows] = useState<TableRow[]>([
     { id: 1, checked: false, task: "Drink milk" },
@@ -34,9 +32,10 @@ function App() {
 
   const handleDeleteRow = (id: number) => {
     setRows(rows.filter((row, _) =>row.id !== id));
-    if (id === editMode) {
+    if (editMode === id) {
       setEditMode(null);
     }
+    showToast("Task deleted", "success");
   };
 
   const handleSubmit = (newRow: TableRow) => {
@@ -56,10 +55,9 @@ function App() {
 
   const [search, setSearch] = useState<string>("");
 
-  const handleFiteredRows = (search: string) => {
-    if (editMode === null) {
+  const handleFilteredRows = (search: string) => {
+    if (checkEditModeOpen()) {
       setSearch(search);
-      setEditMode(null);
     }
   };
     
@@ -67,18 +65,20 @@ function App() {
     row.task.toLowerCase().includes(search.toLowerCase())
   );
 
+  if (filteredRows.length === 0) {
+    showToast("There are no results", "info");
+  }
+
   const handleCheckAll = (checkAll: boolean) => {
     if (checkNotNull()) {
-      if (editMode !== null) {
-        setEditMode(null);
-      }
       let newRows = filteredRows.map(checkBox => (
-          {...checkBox, checked: checkAll}
-        ))
+        checkBox.id !== editMode ?
+          {...checkBox, checked: checkAll} : checkBox
+      ))
       setRows([...newRows,...rows.filter(row => !newRows.some(newRow => newRow.id === row.id))]);
     }
   }
-    
+  
 
 
   const handleCheckBoxChange = (id: number) => {
@@ -92,13 +92,22 @@ function App() {
 
   const checkNotNull = () => {
     if (!rows.every(item => !(item.task === ""))) {
-      showToast("can not save an empty task", "1")
+      showToast("can not save an empty task", "error")
       return false;
-    } else {
-      return true;
-    }
+    } 
+    return true;
   }
 
+  const checkEditModeOpen = (id?: Number) => {
+    if (id) {
+      if (id === editMode) {
+        showToast("edit mode is open", "error");
+        return false;
+      } 
+      return true;
+    }
+    return editMode !== null ? (showToast("edit mode is open", "error"), false) : true;
+  }
   
 
 
@@ -106,7 +115,7 @@ function App() {
     <div className="App">
       <Navbar />
       <SearchBar 
-        sendFilteredRows={handleFiteredRows}
+        sendFilteredRows={handleFilteredRows}
         search={search}
         checkNotNull={checkNotNull}
       />
@@ -118,6 +127,8 @@ function App() {
         onChange={handleCheckBoxChange}
         handleEdit={handleEdit}
         checkNotNull={checkNotNull}
+        checkEditModeOpen={checkEditModeOpen}
+        showToast={showToast}
       />
 
 
@@ -134,6 +145,20 @@ function App() {
         <button onClick={() => handleCheckAll(true)}>check all</button>
         <button onClick={() => handleCheckAll(false)}>uncheck all</button>
       </div>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Slide}
+      />
 
       
 
