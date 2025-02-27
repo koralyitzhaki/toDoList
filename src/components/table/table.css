@@ -4,7 +4,6 @@
   overflow: hidden;
   table-layout: fixed;
   border-collapse: collapse;
-  /* box-shadow: 0px 10px 10px #ccc; */
   border-radius: 10px;
   white-space: nowrap;
   margin: auto;
@@ -15,9 +14,6 @@
 .table td {
   padding: 0.8rem;
   border-top: 0.5px solid #ddd;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* border-color: rgba(61, 61, 61, 0.466); */
 }
 
 
@@ -42,14 +38,26 @@
   width: 100%;
   min-width: 400px;
 }
+/* 
+.edit {
+  display: flex;
+
+} */
+
+/* .td.action {
+  padding-left: 0;
+  margin-left: 0;
+} */
 
 .action svg {
   cursor: pointer;
+  /* left: -50; */
 }
 
 table td.task-td {
   padding-right: 0rem;
 }
+
 table td.task {
   padding-left: 0rem;
 }
@@ -67,4 +75,8 @@ label {
 .checked {
   text-decoration: line-through;
   color: #9d9d9d;
+}
+
+.exitIconCon {
+  border: none !important;
 }

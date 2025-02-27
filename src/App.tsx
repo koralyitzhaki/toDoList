@@ -91,7 +91,7 @@ function App() {
 
 
   const checkNotNull = () => {
-    if (!rows.every(item => !(item.task === ""))) {
+    if (!rows.every(item => !(item.task.trim() === ""))) {
       showToast("can not save an empty task", "error")
       return false;
     } 
@@ -107,6 +107,12 @@ function App() {
       return true;
     }
     return editMode !== null ? (showToast("edit mode is open", "error"), false) : true;
+  }
+
+
+  const handleDeleteAll = () => {
+    const updatedRows = rows.filter(row => row.checked === false);
+    setRows(updatedRows);
   }
   
 
@@ -126,7 +132,6 @@ function App() {
         onSubmit={handleSubmit}
         onChange={handleCheckBoxChange}
         handleEdit={handleEdit}
-        checkNotNull={checkNotNull}
         checkEditModeOpen={checkEditModeOpen}
         showToast={showToast}
       />
@@ -144,6 +149,8 @@ function App() {
       <div className="buttons"> 
         <button onClick={() => handleCheckAll(true)}>check all</button>
         <button onClick={() => handleCheckAll(false)}>uncheck all</button>
+        <button onClick={handleDeleteAll}>deleted all checked</button>
+
       </div>
 
       <ToastContainer
